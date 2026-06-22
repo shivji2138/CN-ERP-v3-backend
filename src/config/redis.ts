@@ -5,7 +5,8 @@ import { logger } from './logger.js';
 export const redis = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: 3,
   enableReadyCheck: true,
-  lazyConnect: true
+  lazyConnect: true,
+  family: 0
 });
 
 redis.on('error', (error: Error) => logger.error({ error }, 'Redis error'));
