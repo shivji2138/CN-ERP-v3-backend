@@ -19,11 +19,12 @@ export const errorMiddleware: ErrorRequestHandler = (error, _req, res, _next) =>
     });
   }
 
+  console.error('Raw unhandled error:', error);
   logger.error(
     {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      error
+      err: error,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined
     },
     'Unhandled API error'
   );
