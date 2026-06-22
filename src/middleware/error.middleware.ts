@@ -30,6 +30,8 @@ export const errorMiddleware: ErrorRequestHandler = (error, _req, res, _next) =>
   );
   return res.status(500).json({
     success: false,
-    message: 'Internal server error'
+    message: 'Internal server error',
+    exactError: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined
   });
 };
