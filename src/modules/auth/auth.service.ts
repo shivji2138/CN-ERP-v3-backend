@@ -1,4 +1,4 @@
-﻿import bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import { Role } from '../role/role.model.js';
 import { User } from '../user/user.model.js';
 import { ApiError } from '../../utils/api-error.js';
@@ -81,10 +81,21 @@ async function resolveUserRole(user: AuthUserDocument) {
 export async function login(email: string, password: string) {
   const normalizedEmail = email.trim().toLowerCase();
   const user = (await User.findOne({ email: normalizedEmail, isDeleted: false }).select('+passwordHash')) as AuthUserDocument | null;
-  if (!user || user.status !== 'ACTIVE') throw new ApiError(401, 'Invalid credentials');
+  
+  if (!user) {
+    console.error(`Login failed: No active user found for email ${normalizedEmail} (isDeleted might be true)`);
+    throw new ApiError(401, 'Invalid credentials');
+  }
+  if (user.status !== 'ACTIVE') {
+    console.error(`Login failed: User ${normalizedEmail} status is ${user.status}, not ACTIVE`);
+    throw new ApiError(401, 'Invalid credentials');
+  }
 
   const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) throw new ApiError(401, 'Invalid credentials');
+  if (!valid) {
+    console.error(`Login failed: Invalid password for ${normalizedEmail}`);
+    throw new ApiError(401, 'Invalid credentials');
+  }
 
   const role = await resolveUserRole(user);
   if (!role) throw new ApiError(403, 'Role is not configured');
